@@ -1,38 +1,18 @@
 const Footer = () => {
   return (
-    <footer style={styles.footer}>
+    <footer className="mt-16 bg-[#111827] px-8 py-10 text-white">
       <div>
-        <h2 style={styles.logo}>BusinessHub</h2>
-        <p style={styles.text}>
+        <h2 className="text-2xl font-bold">BusinessHub</h2>
+        <p className="mt-2 text-gray-300">
           Discover trusted businesses and services near you.
         </p>
       </div>
 
-      <div style={styles.copy}>
+      <p className="mt-8 text-sm text-gray-400">
         © 2026 BusinessHub. All rights reserved.
-      </div>
+      </p>
     </footer>
   );
-};
-
-const styles = {
-  footer: {
-    marginTop: "60px",
-    padding: "40px",
-    backgroundColor: "#111827",
-    color: "#ffffff",
-  },
-  logo: {
-    marginBottom: "10px",
-  },
-  text: {
-    color: "#d1d5db",
-  },
-  copy: {
-    marginTop: "30px",
-    color: "#9ca3af",
-    fontSize: "14px",
-  },
 };
 
 export default Footer;
