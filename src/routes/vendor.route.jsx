@@ -1,9 +1,12 @@
 import { Route } from "react-router-dom";
 
-const VendorRoutes = (
-  <>
-    <Route path="/vendor" element={<h1>Vendor Dashboard</h1>} />
-  </>
-);
+const VendorRoutes = () => {
+  return (
+    <>
+      {/* Vendor routes will be added later */}
+      {/* Example: <Route path="/vendor/dashboard" element={<VendorDashboard />} /> */}
+    </>
+  );
+};
 
 export default VendorRoutes;

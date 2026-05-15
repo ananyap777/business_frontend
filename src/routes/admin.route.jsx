@@ -1,9 +1,12 @@
 import { Route } from "react-router-dom";
 
-const AdminRoutes = (
-  <>
-    <Route path="/admin" element={<h1>Admin Dashboard</h1>} />
-  </>
-);
+const AdminRoutes = () => {
+  return (
+    <>
+      {/* Admin routes will be added later */}
+      {/* Example: <Route path="/admin/dashboard" element={<AdminDashboard />} /> */}
+    </>
+  );
+};
 
 export default AdminRoutes;

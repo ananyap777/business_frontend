@@ -1,14 +1,14 @@
 import AppRoutes from "./routes";
 import Navbar from "./components/common/Navbar";
-import Footer from "./components/common/Footer";
+import ScrollToTop from "./components/common/ScrollToTop";
 
 const App = () => {
   return (
-    <div>
+    <>
+      <ScrollToTop />
       <Navbar />
       <AppRoutes />
-      <Footer />
-    </div>
+    </>
   );
 };
 
