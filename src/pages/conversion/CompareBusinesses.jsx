@@ -91,7 +91,7 @@ const CompareBusinesses = () => {
 
         {selectedBusinesses.length > 0 ? (
           <div className="overflow-x-auto rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
-            <table className="w-full min-w-[800px] border-collapse text-left">
+            <table className="w-full min-w-200 border-collapse text-left">
               <thead className="bg-[#111827] text-white">
                 <tr>
                   <th className="p-4 text-sm font-semibold">Feature</th>

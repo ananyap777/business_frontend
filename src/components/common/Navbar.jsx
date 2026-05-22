@@ -100,9 +100,9 @@ const Navbar = () => {
             />
           ) : (
             <span className="relative h-5 w-5 rounded-md border border-current transition group-hover:border-[#22C55E]">
-              <span className="absolute left-[5px] top-0 h-full w-[1px] bg-current transition group-hover:bg-[#22C55E]" />
-              <span className="absolute left-[9px] top-[5px] h-[2px] w-[6px] rounded-full bg-current transition group-hover:bg-[#22C55E]" />
-              <span className="absolute left-[9px] top-[10px] h-[2px] w-[6px] rounded-full bg-current transition group-hover:bg-[#22C55E]" />
+              <span className="absolute left-1.25 top-0 h-full w-px bg-current transition group-hover:bg-[#22C55E]" />
+              <span className="absolute left-2.25 top-1.25 h-0.5 w-1.5 rounded-full bg-current transition group-hover:bg-[#22C55E]" />
+              <span className="absolute left-2.25 top-2.5 h-0.5 w-1.5 rounded-full bg-current transition group-hover:bg-[#22C55E]" />
             </span>
           )}
         </button>
@@ -111,7 +111,7 @@ const Navbar = () => {
       {/* Mobile Menu */}
       <div
         className={`mx-auto max-w-7xl overflow-hidden transition-all duration-300 lg:hidden ${
-          isOpen ? "max-h-[520px] pb-5 opacity-100" : "max-h-0 pb-0 opacity-0"
+          isOpen ? "max-h-130 pb-5 opacity-100" : "max-h-0 pb-0 opacity-0"
         }`}
       >
         <div className="mt-2 rounded-2xl border border-white/10 bg-[#111827] p-3 shadow-lg">
