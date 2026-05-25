@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { businesses } from "../../data/businesses";
 import BusinessCard from "../../components/business/BusinessCard";
+import { apiGet } from "../../services/api";
 
 const formatSlug = (slug) => {
   return slug
@@ -12,10 +13,15 @@ const formatSlug = (slug) => {
 const CityListing = () => {
   const { cityName } = useParams();
   const formattedCityName = formatSlug(cityName);
+  const [cityBusinesses, setCityBusinesses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const cityBusinesses = businesses.filter(
-    (business) => business.city.toLowerCase() === formattedCityName.toLowerCase()
-  );
+  useEffect(() => {
+    setLoading(true);
+    apiGet("/businesses", { city: formattedCityName })
+      .then((response) => setCityBusinesses(response.data))
+      .finally(() => setLoading(false));
+  }, [formattedCityName]);
 
   const popularServices = [
     "Website Development",
@@ -73,7 +79,11 @@ const CityListing = () => {
           </p>
         </div>
 
-        {cityBusinesses.length > 0 ? (
+        {loading ? (
+          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center text-[#6B7280] shadow-sm">
+            Loading businesses...
+          </div>
+        ) : cityBusinesses.length > 0 ? (
           cityBusinesses.map((business) => (
             <BusinessCard key={business.id} business={business} />
           ))

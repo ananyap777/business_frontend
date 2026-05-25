@@ -1,10 +1,16 @@
-import { businesses } from "../../data/businesses";
+import { useEffect, useState } from "react";
 import BusinessCard from "../../components/business/BusinessCard";
+import { apiGet } from "../../services/api";
 
 const TopRatedBusinesses = () => {
-  const topRatedBusinesses = [...businesses].sort(
-    (a, b) => b.rating - a.rating
-  );
+  const [topRatedBusinesses, setTopRatedBusinesses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiGet("/businesses/top-rated")
+      .then((response) => setTopRatedBusinesses(response.data))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#F9FAFB] px-6 py-10">
@@ -28,14 +34,14 @@ const TopRatedBusinesses = () => {
           <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
             <p className="text-sm text-[#6B7280]">Total Businesses</p>
             <h3 className="mt-2 text-2xl font-bold text-[#1F2937]">
-              {businesses.length}
+              {topRatedBusinesses.length}
             </h3>
           </div>
 
           <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
             <p className="text-sm text-[#6B7280]">Verified Businesses</p>
             <h3 className="mt-2 text-2xl font-bold text-[#1F2937]">
-              {businesses.filter((business) => business.verified).length}
+              {topRatedBusinesses.filter((business) => business.verified).length}
             </h3>
           </div>
 
@@ -73,7 +79,11 @@ const TopRatedBusinesses = () => {
           </select>
         </div>
 
-        {topRatedBusinesses.map((business, index) => (
+        {loading ? (
+          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center text-[#6B7280] shadow-sm">
+            Loading top rated businesses...
+          </div>
+        ) : topRatedBusinesses.map((business, index) => (
           <div key={business.id} className="relative">
             <div className="absolute right-5 top-5 z-10 rounded-full bg-[#22C55E] px-3 py-1 text-xs font-bold text-white">
               #{index + 1}

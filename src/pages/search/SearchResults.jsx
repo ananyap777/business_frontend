@@ -1,57 +1,42 @@
-import { useMemo, useState } from "react";
-import { businesses } from "../../data/businesses";
+import { useEffect, useState } from "react";
 import BusinessCard from "../../components/business/BusinessCard";
 import SearchBar from "../../components/common/SearchBar";
 import FilterSidebar from "../../components/filters/FilterSidebar";
 import EmptyState from "../../components/common/EmptyState";
 import ActionButton from "../../components/common/ActionButton";
 import Icon from "../../components/common/Icon";
+import { apiGet } from "../../services/api";
 
 const SearchResults = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [sortBy, setSortBy] = useState("relevance");
+  const [businesses, setBusinesses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filteredBusinesses = useMemo(() => {
-    const searchText = searchTerm.trim().toLowerCase();
+  useEffect(() => {
+    const loadBusinesses = async () => {
+      setLoading(true);
+      setError("");
 
-    const filtered = businesses.filter((business) => {
-      const matchesSearch =
-        !searchText ||
-        business.name.toLowerCase().includes(searchText) ||
-        business.category.toLowerCase().includes(searchText) ||
-        business.subCategory.toLowerCase().includes(searchText) ||
-        business.city.toLowerCase().includes(searchText) ||
-        business.area.toLowerCase().includes(searchText) ||
-        business.services.some((service) =>
-          service.toLowerCase().includes(searchText)
-        );
+      try {
+        const response = await apiGet("/businesses", {
+          search: searchTerm,
+          category: selectedCategory,
+          city: selectedCity,
+          sortBy,
+        });
+        setBusinesses(response.data);
+      } catch (requestError) {
+        setError(requestError.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      const matchesCategory = selectedCategory
-        ? business.category === selectedCategory
-        : true;
-
-      const matchesCity = selectedCity ? business.city === selectedCity : true;
-
-      return matchesSearch && matchesCategory && matchesCity;
-    });
-
-    if (sortBy === "rating") {
-      return [...filtered].sort((a, b) => Number(b.rating) - Number(a.rating));
-    }
-
-    if (sortBy === "reviews") {
-      return [...filtered].sort(
-        (a, b) => Number(b.reviews || 0) - Number(a.reviews || 0)
-      );
-    }
-
-    if (sortBy === "verified") {
-      return [...filtered].sort((a, b) => Number(b.verified) - Number(a.verified));
-    }
-
-    return filtered;
+    loadBusinesses();
   }, [searchTerm, selectedCategory, selectedCity, sortBy]);
 
   const hasActiveFilters = searchTerm || selectedCategory || selectedCity;
@@ -149,7 +134,7 @@ const SearchResults = () => {
                     </h2>
 
                     <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
-                      {filteredBusinesses.length} found
+                      {businesses.length} found
                     </span>
                   </div>
 
@@ -208,9 +193,24 @@ const SearchResults = () => {
               )}
             </div>
 
-            {filteredBusinesses.length > 0 ? (
+            {loading ? (
+              <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center text-[#6B7280] shadow-sm">
+                Loading businesses...
+              </div>
+            ) : error ? (
+              <EmptyState
+                icon="manage_search"
+                title="Could not load businesses"
+                description={error}
+                action={
+                  <ActionButton onClick={clearFilters} icon="filter_alt_off">
+                    Reset Search
+                  </ActionButton>
+                }
+              />
+            ) : businesses.length > 0 ? (
               <div className="space-y-4">
-                {filteredBusinesses.map((business) => (
+                {businesses.map((business) => (
                   <BusinessCard key={business.id} business={business} />
                 ))}
               </div>

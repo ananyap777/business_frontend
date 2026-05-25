@@ -1,8 +1,16 @@
-import { useState } from "react";
-import { businesses } from "../../data/businesses";
+import { useEffect, useState } from "react";
+import { apiGet } from "../../services/api";
 
 const CompareBusinesses = () => {
   const [selectedIds, setSelectedIds] = useState([1, 2]);
+  const [businesses, setBusinesses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiGet("/businesses")
+      .then((response) => setBusinesses(response.data))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleSelectBusiness = (businessId) => {
     if (selectedIds.includes(businessId)) {
@@ -50,7 +58,9 @@ const CompareBusinesses = () => {
           </p>
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {businesses.map((business) => {
+            {loading ? (
+              <p className="text-sm text-[#6B7280]">Loading businesses...</p>
+            ) : businesses.map((business) => {
               const isSelected = selectedIds.includes(business.id);
 
               return (

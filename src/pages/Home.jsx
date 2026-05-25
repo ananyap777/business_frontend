@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import Icon from "../components/common/Icon";
 import StatCard from "../components/common/StatCard";
 import SectionCard from "../components/common/SectionCard";
 import ActionButton from "../components/common/ActionButton";
+import { apiGet } from "../services/api";
 
 const popularCategories = [
   {
@@ -44,28 +46,39 @@ const steps = [
   },
 ];
 
-const featuredBusinesses = [
-  {
-    name: "PixelCraft Studio",
-    category: "Web Development",
-    location: "Bhubaneswar",
-    rating: "4.8",
-  },
-  {
-    name: "GrowthNest Media",
-    category: "Digital Marketing",
-    location: "Cuttack",
-    rating: "4.7",
-  },
-  {
-    name: "UrbanFix Services",
-    category: "Home Services",
-    location: "Berhampur",
-    rating: "4.6",
-  },
-];
-
 const Home = () => {
+  const [stats, setStats] = useState({
+    businesses: "0",
+    categories: "0",
+    verified: "0",
+  });
+  const [featuredBusinesses, setFeaturedBusinesses] = useState([]);
+
+  useEffect(() => {
+    const loadHomeData = async () => {
+      try {
+        const [businessResponse, featuredResponse, categoryResponse] = await Promise.all([
+          apiGet("/businesses"),
+          apiGet("/businesses/top-rated", { limit: 3 }),
+          apiGet("/categories"),
+        ]);
+
+        const businesses = businessResponse.data || [];
+        const featured = featuredResponse.data || [];
+        setFeaturedBusinesses(featured);
+        setStats({
+          businesses: `${businesses.length}+`,
+          categories: `${categoryResponse.data?.length || 0}+`,
+          verified: `${businesses.filter((business) => business.verified).length}+`,
+        });
+      } catch {
+        setFeaturedBusinesses([]);
+      }
+    };
+
+    loadHomeData();
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#F9FAFB]">
       {/* Hero Section */}
@@ -99,23 +112,23 @@ const Home = () => {
             <div className="mt-10 grid max-w-3xl gap-4 sm:grid-cols-3">
               <StatCard
                 icon="storefront"
-                value="500+"
+                value={stats.businesses}
                 label="Businesses"
                 description="Growing vendor discovery network."
               />
 
               <StatCard
                 icon="category_search"
-                value="50+"
+                value={stats.categories}
                 label="Categories"
                 description="Services across multiple business needs."
               />
 
               <StatCard
                 icon="verified"
-                value="24/7"
-                label="Discovery"
-                description="Find and compare services anytime."
+                value={stats.verified}
+                label="Verified"
+                description="Trusted vendors currently highlighted."
               />
             </div>
           </div>
@@ -264,9 +277,9 @@ const Home = () => {
           </div>
 
           <div className="grid gap-5 md:grid-cols-3">
-            {featuredBusinesses.map((business) => (
+            {featuredBusinesses.length > 0 ? featuredBusinesses.map((business) => (
               <SectionCard
-                key={business.name}
+                key={business.id || business.name}
                 className="transition hover:-translate-y-1 hover:shadow-md"
               >
                 <div className="flex items-start justify-between gap-4">
@@ -289,7 +302,7 @@ const Home = () => {
                 <div className="mt-5 flex items-center justify-between border-t border-[#E5E7EB] pt-4 text-sm text-[#6B7280]">
                   <span className="flex items-center gap-1.5">
                     <Icon name="location_city" size={17} />
-                    {business.location}
+                    {business.city}
                   </span>
 
                   <span className="flex items-center gap-1.5 font-semibold text-[#1F2937]">
@@ -298,7 +311,13 @@ const Home = () => {
                   </span>
                 </div>
               </SectionCard>
-            ))}
+            )) : (
+              <SectionCard className="md:col-span-3">
+                <p className="text-center text-[#6B7280]">
+                  Featured businesses will appear here after the backend loads.
+                </p>
+              </SectionCard>
+            )}
           </div>
         </div>
       </section>

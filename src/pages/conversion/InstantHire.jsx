@@ -1,17 +1,35 @@
 import { useState } from "react";
-import { businesses } from "../../data/businesses";
 import BusinessCard from "../../components/business/BusinessCard";
+import { apiPost } from "../../services/api";
 
 const InstantHire = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [recommendedBusinesses, setRecommendedBusinesses] = useState([]);
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    serviceNeeded: "",
+    location: "",
+    budget: "",
+    urgency: "",
+    name: "",
+    mobile: "",
+  });
 
-  const recommendedBusinesses = businesses
-    .filter((business) => business.verified)
-    .slice(0, 3);
+  const updateField = (field, value) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+  };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError("");
+
+    try {
+      const response = await apiPost("/leads/instant-hire", formData);
+      setRecommendedBusinesses(response.data.recommendedBusinesses || []);
+      setSubmitted(true);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   };
 
   return (
@@ -55,6 +73,8 @@ const InstantHire = () => {
                     <input
                       type="text"
                       placeholder="Example: Website Development"
+                      value={formData.serviceNeeded}
+                      onChange={(e) => updateField("serviceNeeded", e.target.value)}
                       className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] placeholder:text-[#6B7280] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
                     />
                   </div>
@@ -66,6 +86,8 @@ const InstantHire = () => {
                     <input
                       type="text"
                       placeholder="Example: Bhubaneswar"
+                      value={formData.location}
+                      onChange={(e) => updateField("location", e.target.value)}
                       className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] placeholder:text-[#6B7280] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
                     />
                   </div>
@@ -74,8 +96,12 @@ const InstantHire = () => {
                     <label className="mb-2 block text-sm font-semibold text-[#1F2937]">
                       Budget
                     </label>
-                    <select className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100">
-                      <option>Select Budget</option>
+                    <select
+                      value={formData.budget}
+                      onChange={(e) => updateField("budget", e.target.value)}
+                      className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
+                    >
+                      <option value="">Select Budget</option>
                       <option>Below ₹5,000</option>
                       <option>₹5,000 - ₹15,000</option>
                       <option>₹15,000 - ₹50,000</option>
@@ -87,8 +113,12 @@ const InstantHire = () => {
                     <label className="mb-2 block text-sm font-semibold text-[#1F2937]">
                       Urgency
                     </label>
-                    <select className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100">
-                      <option>Select Urgency</option>
+                    <select
+                      value={formData.urgency}
+                      onChange={(e) => updateField("urgency", e.target.value)}
+                      className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
+                    >
+                      <option value="">Select Urgency</option>
                       <option>Immediately</option>
                       <option>Within 2-3 Days</option>
                       <option>This Week</option>
@@ -103,6 +133,8 @@ const InstantHire = () => {
                     <input
                       type="text"
                       placeholder="Enter your name"
+                      value={formData.name}
+                      onChange={(e) => updateField("name", e.target.value)}
                       className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] placeholder:text-[#6B7280] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
                     />
                   </div>
@@ -114,10 +146,14 @@ const InstantHire = () => {
                     <input
                       type="tel"
                       placeholder="Enter mobile number"
+                      value={formData.mobile}
+                      onChange={(e) => updateField("mobile", e.target.value)}
                       className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] placeholder:text-[#6B7280] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
                     />
                   </div>
                 </div>
+
+                {error && <p className="mt-4 text-sm font-semibold text-red-600">{error}</p>}
 
                 <button
                   type="submit"
@@ -142,7 +178,10 @@ const InstantHire = () => {
                 </p>
 
                 <button
-                  onClick={() => setSubmitted(false)}
+                  onClick={() => {
+                    setSubmitted(false);
+                    setRecommendedBusinesses([]);
+                  }}
                   className="mt-6 rounded-lg border border-[#22C55E] px-5 py-3 text-sm font-semibold text-[#22C55E] hover:bg-green-50"
                 >
                   Submit Another Requirement

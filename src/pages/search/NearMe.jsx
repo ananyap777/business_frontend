@@ -1,12 +1,43 @@
 import { useState } from "react";
-import { businesses } from "../../data/businesses";
 import BusinessCard from "../../components/business/BusinessCard";
+import { apiGet } from "../../services/api";
 
 const NearMe = () => {
   const [locationAllowed, setLocationAllowed] = useState(false);
+  const [businesses, setBusinesses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const loadNearbyBusinesses = async (lat = 20.2961, lng = 85.8245) => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await apiGet("/businesses/near-me", {
+        lat,
+        lng,
+        radiusKm: 50,
+      });
+      setBusinesses(response.data);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAllowLocation = () => {
     setLocationAllowed(true);
+    if (!navigator.geolocation) {
+      loadNearbyBusinesses();
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) =>
+        loadNearbyBusinesses(position.coords.latitude, position.coords.longitude),
+      () => loadNearbyBusinesses()
+    );
   };
 
   return (
@@ -73,7 +104,15 @@ const NearMe = () => {
               </div>
             </div>
 
-            {businesses.map((business) => (
+            {loading ? (
+              <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center text-[#6B7280] shadow-sm">
+                Loading nearby businesses...
+              </div>
+            ) : error ? (
+              <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center text-red-600 shadow-sm">
+                {error}
+              </div>
+            ) : businesses.map((business) => (
               <BusinessCard key={business.id} business={business} />
             ))}
           </>

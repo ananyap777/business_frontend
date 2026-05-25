@@ -1,11 +1,30 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { apiPost } from "../../services/api";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [mobile, setMobile] = useState("");
+  const [message, setMessage] = useState("");
 
-  const handleSendOtp = (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-    navigate("/verify-otp");
+    setMessage("");
+
+    try {
+      const response = await apiPost("/auth/request-otp", {
+        mobile,
+        purpose: "login",
+      });
+      sessionStorage.setItem("vyora_otp_mobile", mobile);
+      sessionStorage.setItem("vyora_otp_purpose", "login");
+      if (response.data.devOtp) {
+        sessionStorage.setItem("vyora_dev_otp", response.data.devOtp);
+      }
+      navigate("/verify-otp");
+    } catch (error) {
+      setMessage(error.message);
+    }
   };
 
   return (
@@ -55,9 +74,13 @@ const Login = () => {
               <input
                 type="tel"
                 placeholder="Enter mobile number"
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value)}
                 className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] placeholder:text-[#6B7280] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
               />
             </div>
+
+            {message && <p className="text-sm font-semibold text-red-600">{message}</p>}
 
             <button
               type="submit"

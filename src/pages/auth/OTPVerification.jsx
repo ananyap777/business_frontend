@@ -1,11 +1,28 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { apiPost, saveAuth } from "../../services/api";
 
 const OTPVerification = () => {
   const navigate = useNavigate();
+  const [otp, setOtp] = useState(sessionStorage.getItem("vyora_dev_otp") || "");
+  const [message, setMessage] = useState("");
 
-  const handleVerifyOtp = (e) => {
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    navigate("/search");
+    setMessage("");
+
+    try {
+      const response = await apiPost("/auth/verify-otp", {
+        mobile: sessionStorage.getItem("vyora_otp_mobile"),
+        purpose: sessionStorage.getItem("vyora_otp_purpose") || "login",
+        otp,
+      });
+      saveAuth(response.data);
+      sessionStorage.removeItem("vyora_dev_otp");
+      navigate("/search");
+    } catch (error) {
+      setMessage(error.message);
+    }
   };
 
   return (
@@ -35,9 +52,13 @@ const OTPVerification = () => {
               type="text"
               maxLength="6"
               placeholder="Enter 6 digit OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
               className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-center text-lg font-semibold tracking-[0.4em] text-[#1F2937] placeholder:text-sm placeholder:font-normal placeholder:tracking-normal placeholder:text-[#6B7280] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
             />
           </div>
+
+          {message && <p className="text-sm font-semibold text-red-600">{message}</p>}
 
           <button
             type="submit"

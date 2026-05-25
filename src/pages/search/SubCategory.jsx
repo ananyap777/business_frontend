@@ -1,28 +1,22 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { categories } from "../../data/categories";
-import { businesses } from "../../data/businesses";
 import BusinessCard from "../../components/business/BusinessCard";
-
-const formatSlug = (slug) => {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-};
+import { apiGet } from "../../services/api";
 
 const SubCategory = () => {
   const { categoryName } = useParams();
+  const [category, setCategory] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const formattedCategoryName = formatSlug(categoryName);
+  useEffect(() => {
+    setLoading(true);
+    apiGet(`/categories/${categoryName}`)
+      .then((response) => setCategory(response.data))
+      .finally(() => setLoading(false));
+  }, [categoryName]);
 
-  const category = categories.find(
-    (item) => item.name.toLowerCase() === formattedCategoryName.toLowerCase()
-  );
-
-  const categoryBusinesses = businesses.filter(
-    (business) =>
-      business.category.toLowerCase() === formattedCategoryName.toLowerCase()
-  );
+  const formattedCategoryName = category?.name || categoryName;
+  const categoryBusinesses = category?.businesses || [];
 
   return (
     <main className="min-h-screen bg-[#F9FAFB] px-6 py-10">
@@ -45,7 +39,11 @@ const SubCategory = () => {
           </p>
         </div>
 
-        {category && (
+        {loading ? (
+          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center text-[#6B7280] shadow-sm">
+            Loading category...
+          </div>
+        ) : category && (
           <div className="mb-8 rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold text-[#1F2937]">
               Popular subcategories

@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { businesses } from "../../data/businesses";
 import BusinessCard from "../../components/business/BusinessCard";
+import { apiGet } from "../../services/api";
 
 const formatSlug = (slug) => {
   return slug
@@ -12,10 +13,15 @@ const formatSlug = (slug) => {
 const AreaListing = () => {
   const { areaName } = useParams();
   const formattedAreaName = formatSlug(areaName);
+  const [areaBusinesses, setAreaBusinesses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const areaBusinesses = businesses.filter(
-    (business) => business.area.toLowerCase() === formattedAreaName.toLowerCase()
-  );
+  useEffect(() => {
+    setLoading(true);
+    apiGet("/businesses", { area: formattedAreaName })
+      .then((response) => setAreaBusinesses(response.data))
+      .finally(() => setLoading(false));
+  }, [formattedAreaName]);
 
   const nearbyAreas = [
     "Patia",
@@ -72,7 +78,11 @@ const AreaListing = () => {
           </p>
         </div>
 
-        {areaBusinesses.length > 0 ? (
+        {loading ? (
+          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center text-[#6B7280] shadow-sm">
+            Loading businesses...
+          </div>
+        ) : areaBusinesses.length > 0 ? (
           areaBusinesses.map((business) => (
             <BusinessCard key={business.id} business={business} />
           ))

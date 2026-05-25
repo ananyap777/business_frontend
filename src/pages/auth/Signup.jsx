@@ -1,11 +1,36 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { apiPost } from "../../services/api";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const [message, setMessage] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    mobile: "",
+    email: "",
+    role: "user",
+  });
 
-  const handleSignup = (e) => {
+  const updateField = (field, value) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleSignup = async (e) => {
     e.preventDefault();
-    navigate("/verify-otp");
+    setMessage("");
+
+    try {
+      const response = await apiPost("/auth/signup", formData);
+      sessionStorage.setItem("vyora_otp_mobile", formData.mobile);
+      sessionStorage.setItem("vyora_otp_purpose", "signup");
+      if (response.data.devOtp) {
+        sessionStorage.setItem("vyora_dev_otp", response.data.devOtp);
+      }
+      navigate("/verify-otp");
+    } catch (error) {
+      setMessage(error.message);
+    }
   };
 
   return (
@@ -55,6 +80,8 @@ const Signup = () => {
               <input
                 type="text"
                 placeholder="Enter full name"
+                value={formData.name}
+                onChange={(e) => updateField("name", e.target.value)}
                 className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] placeholder:text-[#6B7280] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
               />
             </div>
@@ -66,6 +93,8 @@ const Signup = () => {
               <input
                 type="tel"
                 placeholder="Enter mobile number"
+                value={formData.mobile}
+                onChange={(e) => updateField("mobile", e.target.value)}
                 className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] placeholder:text-[#6B7280] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
               />
             </div>
@@ -77,6 +106,8 @@ const Signup = () => {
               <input
                 type="email"
                 placeholder="Enter email address"
+                value={formData.email}
+                onChange={(e) => updateField("email", e.target.value)}
                 className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] placeholder:text-[#6B7280] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
               />
             </div>
@@ -85,11 +116,17 @@ const Signup = () => {
               <label className="mb-2 block text-sm font-semibold text-[#1F2937]">
                 Role
               </label>
-              <select className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100">
-                <option>User</option>
-                <option>Vendor</option>
+              <select
+                value={formData.role}
+                onChange={(e) => updateField("role", e.target.value)}
+                className="w-full rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-sm text-[#1F2937] outline-none focus:border-[#22C55E] focus:ring-2 focus:ring-green-100"
+              >
+                <option value="user">User</option>
+                <option value="vendor">Vendor</option>
               </select>
             </div>
+
+            {message && <p className="text-sm font-semibold text-red-600">{message}</p>}
 
             <button
               type="submit"

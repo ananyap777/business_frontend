@@ -1,7 +1,17 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { categories } from "../../data/categories";
+import { apiGet } from "../../services/api";
 
 const CategoryListing = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiGet("/categories")
+      .then((response) => setCategories(response.data))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#F9FAFB] px-6 py-10">
       <section className="mx-auto max-w-7xl">
@@ -20,6 +30,11 @@ const CategoryListing = () => {
           </p>
         </div>
 
+        {loading ? (
+          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center text-[#6B7280]">
+            Loading categories...
+          </div>
+        ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
             <div
@@ -58,6 +73,7 @@ const CategoryListing = () => {
             </div>
           ))}
         </div>
+        )}
       </section>
     </main>
   );
